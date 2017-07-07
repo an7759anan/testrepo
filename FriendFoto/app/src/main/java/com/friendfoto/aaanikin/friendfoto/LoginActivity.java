@@ -177,11 +177,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 //        queueForImages.stop();
 //queue.stop();
 // Авторизация
-//        String url ="https://oauth.vk.com/token?grant_type=password&client_id=6099193&client_secret=decf3d05decf3d05decf3d05f1de922dfcddecfdecf3d0587951f6d88fd756f62f54dd5&username=an7759anan@rtural.ru&password=Ptktyfz1,skf";
-//        String url ="https://oauth.vk.com/authorize?client_id=6099193&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.67&state=123456";
 // список друзей БЕЗ фото и информации о них
         stringRequestInProgress=true;
-        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_50&access_token=645c5f5ece0d070e378515eb66ee324fe20245c383ae91a8f24b19aa2a8cf1b6b3691caa727507dc07a22&v=5.67";
+        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_50&access_token=.....&v=5.67";
 // Request a string response from the provided URL.
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
@@ -380,48 +378,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-
-
-//                RequestQueue queue = Volley.newRequestQueue(this);
-                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-// список друзей БЕЗ фото и информации о них
-                String url ="https://api.vk.com/method/friends.get?order=name&fields='nickname'&access_token=fbb578194e0e8f1a5987b05c44d581654b55d03312b7193320bd2b56c92ca9d188873385a4630dee432c3&v=5.67";
-// Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
-                                String s=response;
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        String s="That didn't work!";
-                    }
-                });
-// Add the request to the RequestQueue.
-                queue.add(stringRequest);
-
-
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-/*            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-*/
-            // TODO: register the new account here.
             return true;
         }
 
