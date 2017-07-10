@@ -34,6 +34,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -61,6 +62,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     public static int count;
     public static boolean imageRequestInProgress=false;
     public static boolean stringRequestInProgress=false;
+    public static int ident;
 
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -174,13 +176,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         RequestQueue queue = Volley.newRequestQueue(this);
         final RequestQueue queueForImages = Volley.newRequestQueue(this);
-//        queueForImages.stop();
+        queueForImages.stop();
 //queue.stop();
 // Авторизация
 // список друзей БЕЗ фото и информации о них
         stringRequestInProgress=true;
-        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_50&access_token=.....&v=5.67";
+        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_200_orig&access_token=...&v=5.67";
 // Request a string response from the provided URL.
+
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -196,10 +199,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                             JSONArray items = jObj.getJSONObject("response").getJSONArray("items");
                             for (int i=0; i < count; i++){
                                 JSONObject item = items.getJSONObject(i);
-                                int id = item.getInt("id");
+                                ident = item.getInt("id");
                                 String name = item.getString("first_name")+" "+item.getString("last_name");
-                                String image_url = item.getString("photo_50").replace("\\","");
-                                cv.put("id",id);
+                                String image_url = item.getString("photo_200_orig").replace("\\","");
+                                cv.put("id",ident);
                                 cv.put("name",name);
                                 cv.put("image_url",image_url);
                                 try {
@@ -208,15 +211,49 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     s=e.getMessage();
                                 }
                                 // планируем http запрос на получение картинок ...
+                                imageRequestInProgress=true;
+                                ImageRequest imageRequest = new ImageRequest(
+                                        image_url,
+                                        new Response.Listener<Bitmap>() {
+                                            int id=ident;
+                                            @Override
+                                            public void onResponse(Bitmap response) {
+                                                Bitmap bitmap = response;
+                                                imageRequestInProgress=false;
+                                                int idd=id;
+                                                SQLiteDatabase db=dbHelper.getWritableDatabase();
+                                                ContentValues cv = new ContentValues();
+                                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                                bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+                                                cv.put("image",stream.toByteArray());
+                                                int u = db.update("friends",cv,"id = " + Integer.toString(id),null);
+                                                db.close();
+                                                if (--count==0){
+                                                    Intent intent=new Intent(LoginActivity.this,FriendListActivity.class);
+                                                    startActivity(intent);
+                                                }
+                                            }
+                                        },
+                                        200,200,
+                                        Bitmap.Config.ARGB_8888,
+                                        new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                String s="That didn't work!";
+                                            }});
+
+//                                imageRequest.setTag(id);
+                                queueForImages.add(imageRequest);
+//                                while(imageRequestInProgress);
                             }
-//                            queueForImages.start();
+                            queueForImages.start();
                         } catch (JSONException e){
                             s = e.getMessage();
                         }
                         db.close();
-                        stringRequestInProgress=false;
+/*                        stringRequestInProgress=false;
                         Intent intent=new Intent(LoginActivity.this,FriendListActivity.class);
-                        startActivity(intent);
+                        startActivity(intent);*/
                     }
                 }, new Response.ErrorListener() {
             @Override
