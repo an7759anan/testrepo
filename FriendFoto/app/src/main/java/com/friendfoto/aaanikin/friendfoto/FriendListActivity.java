@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.View;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -51,7 +50,6 @@ public class FriendListActivity extends AppCompatActivity {
                 String name = c.getString(nameColIndex);
                 byte[] imageBytes = c.getBlob(imageColIndex);
                 Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                Log.d(LoginActivity.LOG_TAG,"");
 
                 TableRow row = new TableRow(this);
                 row.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -61,8 +59,6 @@ public class FriendListActivity extends AppCompatActivity {
                 row.addView(imageCell);
 
                 TextView cell = new TextView(this);
-//                cell.setText(Integer.toString(id));
-//                row.addView(cell);
                 cell = new TextView(this);
                 cell.setText(name);
                 row.addView(cell);
@@ -70,8 +66,7 @@ public class FriendListActivity extends AppCompatActivity {
                 table.addView(row);
 
             } while (c.moveToNext());
-        } else
-            Log.d(LoginActivity.LOG_TAG,"0 rows");
+        }
         c.close();
         db.close();
     }
