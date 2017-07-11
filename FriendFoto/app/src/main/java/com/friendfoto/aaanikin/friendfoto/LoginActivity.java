@@ -40,6 +40,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import com.android.volley.*;
 import com.android.volley.toolbox.StringRequest;
@@ -60,10 +62,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     final static String LOG_TAG = "friedsFotoLogs";
     public static DBHelper dbHelper;
     public static int count;
-    public static boolean imageRequestInProgress=false;
-    public static boolean stringRequestInProgress=false;
     public static int ident;
-
+    public static String _origin;
+    public static String ip_h;
+    public static String lg_h;
+    public static String to;
+    public static String email;
+    public static String pass;
     /**
      * Id to identity READ_CONTACTS permission request.
      */
@@ -174,14 +179,76 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Instantiate the RequestQueue.
 
 
+        RequestQueue authorizeQueue = Volley.newRequestQueue(this);
         RequestQueue queue = Volley.newRequestQueue(this);
         final RequestQueue queueForImages = Volley.newRequestQueue(this);
+        final RequestQueue postqueue = Volley.newRequestQueue(this);
         queueForImages.stop();
 //queue.stop();
 // Авторизация
+        Uri uri = Uri.parse("https://oauth.vk.com/authorize?client_id=6099193&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.67");
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
+        if (true) return;
+/*
+        email = mEmailView.getText().toString();
+        pass = mPasswordView.getText().toString();
+        StringRequest authorizeRequest = new StringRequest(Request.Method.GET, "https://oauth.vk.com/authorize?client_id=6099193&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.67&state=123456",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        String s=response;
+                        _origin=response.substring(response.indexOf("name=\"_origin\" value=\"")+22,response.indexOf(">",response.indexOf("name=\"_origin\" value=\"")+22)-1);
+                        ip_h=response.substring(response.indexOf("name=\"ip_h\" value=\"")+19,response.indexOf(">",response.indexOf("name=\"ip_h\" value=\"")+19)-3);
+                        lg_h=response.substring(response.indexOf("name=\"lg_h\" value=\"")+19,response.indexOf(">",response.indexOf("name=\"lg_h\" value=\"")+19)-3);
+                        to=response.substring(response.indexOf("name=\"to\" value=\"")+17,response.indexOf(">",response.indexOf("name=\"to\" value=\"")+17)-1);
+                        StringRequest postRequest = new StringRequest(Request.Method.POST, "https://login.vk.com/?act=login&soft=1&utf8=1",
+                                new Response.Listener<String>()
+                                {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        // response
+                                        Log.d("Response", response);
+                                    }
+                                },
+                                new Response.ErrorListener()
+                                {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        // error
+                                        Log.d("Error.Response", error.getMessage());
+                                    }
+                                }
+                        ) {
+                            @Override
+                            protected Map<String, String> getParams()
+                            {
+                                Map<String, String>  params = new HashMap<String, String>();
+                                params.put("_origin", _origin);
+                                params.put("ip_h", ip_h);
+                                params.put("lg_h", lg_h);
+                                params.put("to", to);
+                                params.put("email", email);
+                                params.put("pass", pass);
+
+                                return params;
+                            }
+                        };
+                        postqueue.add(postRequest);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        String s="That didn't work!";
+                    }
+                }
+        );
+        authorizeQueue.add(authorizeRequest);
+*/
+
 // список друзей БЕЗ фото и информации о них
-        stringRequestInProgress=true;
-        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_200_orig&access_token=...&v=5.67";
+        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_200_orig&access_token=dcc0fe0f162cc84db8f9dd13f4ab764cd8a50c35125e67449eee9f8d9eef0f8ca3fc4fe31f5ad32767e7c&v=5.67";
 // Request a string response from the provided URL.
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -211,7 +278,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                     s=e.getMessage();
                                 }
                                 // планируем http запрос на получение картинок ...
-                                imageRequestInProgress=true;
                                 ImageRequest imageRequest = new ImageRequest(
                                         image_url,
                                         new Response.Listener<Bitmap>() {
@@ -219,7 +285,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                             @Override
                                             public void onResponse(Bitmap response) {
                                                 Bitmap bitmap = response;
-                                                imageRequestInProgress=false;
                                                 int idd=id;
                                                 SQLiteDatabase db=dbHelper.getWritableDatabase();
                                                 ContentValues cv = new ContentValues();
@@ -241,19 +306,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                                             public void onErrorResponse(VolleyError error) {
                                                 String s="That didn't work!";
                                             }});
-
-//                                imageRequest.setTag(id);
                                 queueForImages.add(imageRequest);
-//                                while(imageRequestInProgress);
                             }
                             queueForImages.start();
                         } catch (JSONException e){
                             s = e.getMessage();
                         }
                         db.close();
-/*                        stringRequestInProgress=false;
-                        Intent intent=new Intent(LoginActivity.this,FriendListActivity.class);
-                        startActivity(intent);*/
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -261,43 +320,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 String s="That didn't work!";
             }
         });
-// Add the request to the RequestQueue.
         queue.add(stringRequest);
-//while(stringRequestInProgress);
-/*        Intent intent=new Intent(LoginActivity.this,FriendListActivity.class);
-        startActivity(intent);*/
         return;
     }
-/*
-    imageRequestInProgress=true;
-    ImageRequest imageRequest = new ImageRequest(
-            image_url,
-            new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-                    Bitmap bitmap = response;
-                    imageRequestInProgress=false;
-                                                if (--count==0){
-                                                    Intent intent=new Intent(LoginActivity.this,FriendListActivity.class);
-                                                    startActivity(intent);
-                                                }
-                                          }
-            },
-            50,50,
-            Bitmap.Config.ARGB_8888,
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    String s="That didn't work!";
-                }});
-
-//                                imageRequest.setTag(id);
-                                queueForImages.add(imageRequest);
-                                while(imageRequestInProgress);
-*/
-
-
-
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
