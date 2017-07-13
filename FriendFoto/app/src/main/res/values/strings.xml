@@ -13,7 +13,7 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_activity_friend_list_acivity">FriendListAcivity</string>
+    <string name="title_activity_friend_list_acivity">Мои друзья</string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
@@ -103,5 +103,8 @@
         "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
         "when a user tries to pick up one of cards.\n\n"
     </string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Выйти из ВК</string>
+    <string name="vkLoginUrl">https://oauth.vk.com/authorize?client_id=6099193&amp;display=mobile&amp;redirect_uri=https://oauth.vk.com/blank.html&amp;scope=friends&amp;response_type=token&amp;v=5.67</string>
+    <string name="vkServiceUrl">https://api.vk.com/method/friends.get?order=name&amp;fields=nickname,photo_200_orig&amp;access_token=</string>
+    <string name="vkLogoutUrl">http://api.vk.com/oauth/logout?hash=</string>
 </resources>
