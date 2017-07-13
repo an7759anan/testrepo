@@ -179,6 +179,7 @@ public class LoginActivity extends AppCompatActivity{
                                         new Response.ErrorListener() {
                                             @Override
                                             public void onErrorResponse(VolleyError error) {
+                                                count--;
                                                 String s="That didn't work!";
                                             }});
                                 queueForImages.add(imageRequest);
