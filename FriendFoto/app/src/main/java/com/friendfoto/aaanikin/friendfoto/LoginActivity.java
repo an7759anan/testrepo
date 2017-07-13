@@ -44,6 +44,15 @@ public class LoginActivity extends AppCompatActivity{
         dbHelper = new DBHelper(this);
         vklogin = (WebView) findViewById(R.id.webviewid);
         accessToken=null;
+
+        vklogin.clearCache(true);
+        vklogin.clearFormData();
+        vklogin.clearHistory();
+        vklogin.clearMatches();
+        vklogin.clearSslPreferences();
+
+
+
         vklogin.setWebViewClient(new MyWebViewClient(){
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -53,20 +62,21 @@ public class LoginActivity extends AppCompatActivity{
                     int startIdx=tokenStartIdx+"access_token=".length();
                     int finishIdx=url.indexOf("&",startIdx);
                     accessToken = url.substring(startIdx,finishIdx);
-                    attemptLogin();
+                    goToFriendListActivity();
                 }
             }
         });
         vklogin.getSettings().setJavaScriptEnabled(true);
-        vklogin.loadUrl("https://oauth.vk.com/authorize?client_id=6099193&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=friends&response_type=token&v=5.67");
+//        vklogin.loadUrl(getResources().getString(R.string.vkLogoutUrl));
+        vklogin.loadUrl(getResources().getString(R.string.vkLoginUrl));
     }
 
-    private void attemptLogin() {
+    private void goToFriendListActivity() {
         RequestQueue queue = Volley.newRequestQueue(this);
         final RequestQueue queueForImages = Volley.newRequestQueue(this);
         queueForImages.stop();
 // список друзей БЕЗ фото и информации о них
-        String url ="https://api.vk.com/method/friends.get?order=name&fields=nickname,photo_200_orig&access_token="+accessToken;
+        String url =getResources().getString(R.string.vkServiceUrl)+accessToken;
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
