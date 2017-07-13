@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -49,13 +51,16 @@ public class FriendListActivity extends AppCompatActivity {
                 String name = c.getString(nameColIndex);
                 byte[] imageBytes = c.getBlob(imageColIndex);
                 Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                RoundedBitmapDrawable dr = RoundedBitmapDrawableFactory.create(null,image);
+//                dr.setCornerRadius(Math.max(image.getWidth(), image.getHeight()) / 2.0f);
+//                dr.setCornerRadius(400);
+                dr.setCircular(true);
                 TableRow row = new TableRow(this);
                 row.setGravity(Gravity.LEFT);
                 ImageView imageCell = new ImageView(this);
-                imageCell.setImageBitmap(image);
+                imageCell.setImageDrawable(dr);
                 row.addView(imageCell);
-                TextView cell = new TextView(this);
-                cell = new TextView(this);
+                TextView cell= new TextView(this);
                 cell.setText(name);
                 row.addView(cell);
                 table.addView(row);
@@ -75,12 +80,16 @@ public class FriendListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_logout:
+                LoginActivity.b1=true;
                 finish();
+                if (true) return true;
 /*                Intent intent=new Intent(FriendListActivity.this,LoginActivity.class);
                 startActivity(intent);*/
-/*                RequestQueue queue = Volley.newRequestQueue(this);
-                String url =getResources().getString(R.string.vkLogoutUrl);
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                RequestQueue queue = Volley.newRequestQueue(this);
+//                String url =getResources().getString(R.string.vkLogoutUrl);
+//                String url ="https://login.vk.com/?act=logout&hash="+LoginActivity.hashCode+"&_origin=http://vk.com";
+                String url ="https://login.vk.com/?act=logout&hash="+LoginActivity.hashCode;
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                         new Response.Listener<String>() {
                             @Override
                             public void onResponse(String response) {
@@ -93,7 +102,8 @@ public class FriendListActivity extends AppCompatActivity {
                             }
                         });
                 queue.add(stringRequest);
-                return true;*/
+                finish();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

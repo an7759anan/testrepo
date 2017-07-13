@@ -20,22 +20,13 @@ import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity{
 
-    // класс для того, чтобы у Android'а не было желания запускать какой-либо иной браузер ...
-    private class MyWebViewClient extends WebViewClient
-    {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url)
-        {
-            view.loadUrl(url);
-            return true;
-        }
-    }
-
     public String accessToken;
     public static DBHelper dbHelper;
     public static int count;
     public static int ident;
     public WebView vklogin;
+    public static String hashCode;
+    public static boolean b1=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +35,68 @@ public class LoginActivity extends AppCompatActivity{
         dbHelper = new DBHelper(this);
         vklogin = (WebView) findViewById(R.id.webviewid);
         accessToken=null;
-
+/*
         vklogin.clearCache(true);
         vklogin.clearFormData();
         vklogin.clearHistory();
         vklogin.clearMatches();
         vklogin.clearSslPreferences();
+*/
 
 
+    }
 
-        vklogin.setWebViewClient(new MyWebViewClient(){
+    @Override
+    protected void onResume() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getResources().getString(R.string.vkLoginUrl);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        hashCode = response.substring(response.indexOf("&hash=")+6,response.indexOf("&",response.indexOf("&hash=")+6));
+/*
+                        vklogin.setWebViewClient(new WebViewClient(){
+                            @Override
+                            //чтобы у Android'а не было желания запускать какой-либо иной браузер ...
+                            public boolean shouldOverrideUrlLoading(WebView view, String url)
+                            {
+                                view.loadUrl(url);
+                                return true;
+                            }
+                            @Override
+                            public void onPageFinished(WebView view, String url) {
+                                super.onPageFinished(view, url);
+                                int tokenStartIdx = url.indexOf("access_token=");
+                                if (tokenStartIdx>0 && accessToken==null) {
+                                    int startIdx=tokenStartIdx+"access_token=".length();
+                                    int finishIdx=url.indexOf("&",startIdx);
+                                    accessToken = url.substring(startIdx,finishIdx);
+                                    goToFriendListActivity();
+                                }
+                            }
+                        });
+                        vklogin.getSettings().setJavaScriptEnabled(true);
+                        vklogin.loadData(response,"text/html; charset=UTF-8", null);
+*/
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                String s="That didn't work!";
+            }
+        });
+        queue.add(stringRequest);
+
+        vklogin.setWebViewClient(new WebViewClient(){
+            @Override
+            //чтобы у Android'а не было желания запускать какой-либо иной браузер ...
+            public boolean shouldOverrideUrlLoading(WebView view, String url)
+            {
+                view.loadUrl(url);
+                return true;
+            }
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
@@ -68,7 +111,14 @@ public class LoginActivity extends AppCompatActivity{
         });
         vklogin.getSettings().setJavaScriptEnabled(true);
 //        vklogin.loadUrl(getResources().getString(R.string.vkLogoutUrl));
-        vklogin.loadUrl(getResources().getString(R.string.vkLoginUrl));
+        if(b1){
+//            vklogin.loadUrl("https://login.vk.com/?act=logout&hash="+LoginActivity.hashCode);
+//            vklogin.loadUrl("https://login.vk.com/?act=logout");
+            vklogin.loadUrl("https://vk.com/login?act=mobile&hash="+LoginActivity.hashCode);
+        } else {
+            vklogin.loadUrl(getResources().getString(R.string.vkLoginUrl));
+        }
+        super.onResume();
     }
 
     private void goToFriendListActivity() {
